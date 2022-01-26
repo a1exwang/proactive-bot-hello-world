@@ -25,7 +25,7 @@ const adapter = new BotFrameworkAdapter({
 // Create conversation reference storage
 const conversationReferenceStore = new ConversationReferenceStore();
 // Create the bot that will handle incoming messages.
-const bot = new TeamsBot(conversationReferenceStore);
+const bot = new TeamsBot(adapter, conversationReferenceStore);
 // Create notification sender to proactively send outgoing messages.
 const notificationSender = new NotificationSender(adapter);
 
@@ -42,4 +42,5 @@ server.post("/api/notification", async (req, res) => {
     conversationReferenceStore.get(),
     "Hello world!\nYou've received a notification triggered by API."
   );
+  res.json({});
 });

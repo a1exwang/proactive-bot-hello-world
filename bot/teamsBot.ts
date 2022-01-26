@@ -25,8 +25,9 @@ export class TeamsBot extends TeamsActivityHandler {
   adapter: BotFrameworkAdapter;
   conversationReferenceStore: ConversationReferenceStore;
 
-  constructor(conversationReferenceStore: ConversationReferenceStore) {
+  constructor(adapter: BotFrameworkAdapter, conversationReferenceStore: ConversationReferenceStore) {
     super();
+    this.adapter = adapter;
     this.conversationReferenceStore = conversationReferenceStore;
 
     this.onMembersAdded(async (context, next) => {
