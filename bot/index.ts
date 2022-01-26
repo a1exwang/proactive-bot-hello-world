@@ -29,14 +29,14 @@ const bot = new TeamsBot(adapter, conversationReferenceStore);
 // Create notification sender to proactively send outgoing messages.
 const notificationSender = new NotificationSender(adapter);
 
-// Listen for incoming requests.
+// Bot listens for incoming requests.
 server.post("/api/messages", async (req, res) => {
   return await adapter.processActivity(req, res, async (context) => {
     await bot.run(context);
   });
 });
 
-// Send notification
+// HTTP trigger for the notification.
 server.post("/api/notification", async (req, res) => {
   await notificationSender.sendNotification(
     conversationReferenceStore.get(),
