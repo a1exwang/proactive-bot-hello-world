@@ -38,9 +38,10 @@ server.post("/api/messages", async (req, res) => {
 
 // HTTP trigger for the notification.
 server.post("/api/notification", async (req, res) => {
+  const notificationText = "Hello world!\nYou've received a notification triggered by API.";
   await notificationSender.sendNotification(
     conversationReferenceStore.get(),
-    "Hello world!\nYou've received a notification triggered by API."
+    notificationText,
   );
   res.json({});
 });
