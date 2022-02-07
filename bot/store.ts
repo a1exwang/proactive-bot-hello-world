@@ -13,4 +13,14 @@ export class ConversationReferenceStore {
       //    JSON.stringify(conversationReference);
     this._ref.push(conversationReference);
   }
+
+  delete(conversationId: string) {
+    let result = [];
+    for (const key of this._ref) {
+      if (key.conversation.id !== conversationId) {
+        result.push(key);
+      }
+    }
+    this._ref = result;
+  }
 }
