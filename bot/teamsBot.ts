@@ -62,6 +62,18 @@ export class TeamsBot extends TeamsActivityHandler {
       await next();
     });
 
+    this.onTeamsChannelCreatedEvent(async (channelInfo: ChannelInfo, teamInfo: TeamInfo, context: TurnContext, next) => {
+      if (channelInfo.id) {
+        const ref = TurnContext.getConversationReference(context.activity);
+        const channelRef = cloneConversationReference(ref);
+        channelRef.conversation.id = channelInfo.id;
+        channelRef.conversation.name = channelInfo.name;
+        this.conversationReferenceStore.add(channelRef);
+      }
+
+      await next();
+    });
+
     this.onTeamsChannelDeletedEvent(async (channelInfo: ChannelInfo, teamInfo: TeamInfo, context: TurnContext, next) => {
       if (channelInfo.id) {
         const ref = TurnContext.getConversationReference(context.activity);
