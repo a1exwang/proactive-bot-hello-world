@@ -45,18 +45,9 @@ export class TeamsBot extends TeamsActivityHandler {
         }
       }
 
-      const ref = TurnContext.getConversationReference(context.activity);
-      // TODO: only support adding to a team channel
-      if (isSelfAdded && context.activity.conversation.conversationType === "channel") {
-        const channels = await TeamsInfo.getTeamChannels(context);
-        channels.forEach((channel) => {
-          if (channel.id) {
-            const channelRef = cloneConversationReference(ref);
-            channelRef.conversation.id = channel.id;
-            channelRef.conversation.name = channel.name;
-            this.conversationReferenceStore.add(channelRef);
-          }
-        });
+      if (isSelfAdded) {
+        const ref = TurnContext.getConversationReference(context.activity);
+        this.conversationReferenceStore.add(ref);
       }
 
       await next();
@@ -85,6 +76,8 @@ export class TeamsBot extends TeamsActivityHandler {
 
       await next();
     })
+
+    // TODO: implement all conversation update events, for example, onTeamsMemberAdded
 
     // Set the onTurnError for the singleton BotFrameworkAdapter.
     this.adapter.onTurnError = onTurnErrorHandler;
