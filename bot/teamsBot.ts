@@ -1,4 +1,5 @@
-import { BotFrameworkAdapter, ChannelInfo, ConversationReference, TeamInfo, TeamsActivityHandler, TeamsChannelData, TeamsInfo, TurnContext } from "botbuilder";
+import { BotFrameworkAdapter, ChannelInfo, ConversationReference, MessageFactory, TeamInfo, TeamsActivityHandler, TeamsChannelData, TeamsInfo, TurnContext, teamsGetChannelId, TeamsChannelAccount, teamsGetTeamInfo, ConversationParameters, Activity, teamsGetTenant } from "botbuilder";
+import { ConnectorClient } from "botframework-connector";
 import { ConversationReferenceStore } from "./store";
 
 function cloneConversationReference(ref: Partial<ConversationReference>): Partial<ConversationReference> {
@@ -25,6 +26,38 @@ const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
   await context.sendActivity("To continue to run this bot, please fix the bot source code.");
 };
 
+export enum TeamsContextType {
+  Team = "team",
+  GroupChat = "groupChat",
+  PersonalChat = "personalChat",
+}
+
+export interface TeamsContextInfo {
+  type: TeamsContextType;
+  conversationReference: Partial<ConversationReference>;
+}
+
+export interface TeamsTeamInfo {
+  type: TeamsContextType.Team;
+
+  teamInfo: TeamInfo;
+  members: TeamsChannelAccount[];
+  channels: ChannelInfo[];
+}
+
+export interface TeamsGroupChatInfo {
+  type: TeamsContextType.GroupChat;
+  members: TeamsChannelAccount[];
+}
+
+export interface TeamsPersonalChatInfo {
+  type: TeamsContextType.PersonalChat;
+}
+
+export interface TeamsContextStore {
+  listContexts(): TeamsContextInfo[];
+}
+
 export class TeamsBot extends TeamsActivityHandler {
   adapter: BotFrameworkAdapter;
   conversationReferenceStore: ConversationReferenceStore;
@@ -47,7 +80,10 @@ export class TeamsBot extends TeamsActivityHandler {
 
       if (isSelfAdded) {
         const ref = TurnContext.getConversationReference(context.activity);
-        this.conversationReferenceStore.add(ref);
+        const channelId = context.activity.channelData?.settings?.selectedChannel?.id;
+        await context.sendActivity("haha");
+        ref.conversation.id = channelId;
+        this.conversationReferenceStore.add(channelId);
       }
 
       await next();
@@ -76,6 +112,37 @@ export class TeamsBot extends TeamsActivityHandler {
 
       await next();
     })
+
+    this.onMessage(async (context: TurnContext, next) => {
+      // const message = MessageFactory.text('This will be the first message in a new thread');
+      // const teamsChannelId = teamsGetChannelId(context.activity);;
+      // const conversationParameters: ConversationParameters = {
+      //   isGroup: true,
+      //   channelData: {
+      //     channel: {
+      //       id: teamsChannelId,
+      //     }
+      //   },
+
+      //   activity: message
+      // };
+
+
+      const connectorClient: ConnectorClient = context.turnState.get(context.adapter['ConnectorClientKey']);
+      const convs = await connectorClient.conversations.getConversations();
+      for (const c of convs.conversations) {
+        console.log(c.id);
+      }
+      // const conversationResourceResponse = await connectorClient.conversations.createConversation(conversationParameters);
+      const conversationReference = TurnContext.getConversationReference(context.activity);
+      // conversationReference.conversation.id = conversationResourceResponse.id;
+
+      await context.adapter.continueConversationAsync(process.env.MicrosoftAppId, conversationReference, async turnContext => {
+        await turnContext.sendActivity(MessageFactory.text('This will be the first response to the new thread'));
+      });
+
+      await next();
+    });
 
     // TODO: implement all conversation update events, for example, onTeamsMemberAdded
 
