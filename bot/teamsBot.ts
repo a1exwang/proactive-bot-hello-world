@@ -26,38 +26,6 @@ const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
   await context.sendActivity("To continue to run this bot, please fix the bot source code.");
 };
 
-export enum TeamsContextType {
-  Team = "team",
-  GroupChat = "groupChat",
-  PersonalChat = "personalChat",
-}
-
-export interface TeamsContextInfo {
-  type: TeamsContextType;
-  conversationReference: Partial<ConversationReference>;
-}
-
-export interface TeamsTeamInfo {
-  type: TeamsContextType.Team;
-
-  teamInfo: TeamInfo;
-  members: TeamsChannelAccount[];
-  channels: ChannelInfo[];
-}
-
-export interface TeamsGroupChatInfo {
-  type: TeamsContextType.GroupChat;
-  members: TeamsChannelAccount[];
-}
-
-export interface TeamsPersonalChatInfo {
-  type: TeamsContextType.PersonalChat;
-}
-
-export interface TeamsContextStore {
-  listContexts(): TeamsContextInfo[];
-}
-
 export class TeamsBot extends TeamsActivityHandler {
   adapter: BotFrameworkAdapter;
   conversationReferenceStore: ConversationReferenceStore;
@@ -126,7 +94,7 @@ export class TeamsBot extends TeamsActivityHandler {
 
       //   activity: message
       // };
-
+      const result = await TeamsInfo.getPagedMembers(context);
 
       const connectorClient: ConnectorClient = context.turnState.get(context.adapter['ConnectorClientKey']);
       const convs = await connectorClient.conversations.getConversations();
