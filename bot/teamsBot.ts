@@ -1,5 +1,9 @@
-import { BotFrameworkAdapter, TeamsActivityHandler, TurnContext } from "botbuilder";
+import { BotFrameworkAdapter, ChannelInfo, ConversationReference, TeamInfo, TeamsActivityHandler, TeamsChannelData, TeamsInfo, TurnContext } from "botbuilder";
 import { ConversationReferenceStore } from "./store";
+
+function cloneConversationReference(ref: Partial<ConversationReference>): Partial<ConversationReference> {
+  return JSON.parse(JSON.stringify(ref));
+}
 
 // Catch-all for errors.
 const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
@@ -24,16 +28,56 @@ const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
 export class TeamsBot extends TeamsActivityHandler {
   adapter: BotFrameworkAdapter;
   conversationReferenceStore: ConversationReferenceStore;
+  botId: string;
 
-  constructor(adapter: BotFrameworkAdapter, conversationReferenceStore: ConversationReferenceStore) {
+  constructor(adapter: BotFrameworkAdapter, conversationReferenceStore: ConversationReferenceStore, botId: string) {
     super();
     this.adapter = adapter;
     this.conversationReferenceStore = conversationReferenceStore;
+    this.botId = botId;
 
-    this.onMembersAdded(async (context, next) => {
-      this.conversationReferenceStore.set(TurnContext.getConversationReference(context.activity));
+    this.onMembersAdded(async (context: TurnContext, next) => {
+      let isSelfAdded: boolean = false;
+      // check whether the member added is myself (the bot app)
+      for (const member of context.activity.membersAdded) {
+        if (member.id.includes(botId)) {
+          isSelfAdded = true;
+        }
+      }
+
+      if (isSelfAdded) {
+        const ref = TurnContext.getConversationReference(context.activity);
+        this.conversationReferenceStore.add(ref);
+      }
+
       await next();
     });
+
+    this.onTeamsChannelCreatedEvent(async (channelInfo: ChannelInfo, teamInfo: TeamInfo, context: TurnContext, next) => {
+      if (channelInfo.id) {
+        const ref = TurnContext.getConversationReference(context.activity);
+        const channelRef = cloneConversationReference(ref);
+        channelRef.conversation.id = channelInfo.id;
+        channelRef.conversation.name = channelInfo.name;
+        this.conversationReferenceStore.add(channelRef);
+      }
+
+      await next();
+    });
+
+    this.onTeamsChannelDeletedEvent(async (channelInfo: ChannelInfo, teamInfo: TeamInfo, context: TurnContext, next) => {
+      if (channelInfo.id) {
+        const ref = TurnContext.getConversationReference(context.activity);
+        const channelRef = cloneConversationReference(ref);
+        channelRef.conversation.id = channelInfo.id;
+        channelRef.conversation.name = channelInfo.name;
+        this.conversationReferenceStore.delete(channelInfo.id);
+      }
+
+      await next();
+    })
+
+    // TODO: implement all conversation update events, for example, onTeamsMemberAdded
 
     // Set the onTurnError for the singleton BotFrameworkAdapter.
     this.adapter.onTurnError = onTurnErrorHandler;
