@@ -1,8 +1,8 @@
 import { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, BotFrameworkAdapter } from "botbuilder";
 import rawWelcomeCard from "./adaptiveCards/welcome.json"
 import { AdaptiveCards } from "@microsoft/adaptivecards-tools";
-import { ConversationReferenceStore } from "./store";
-import { conversationIdToTeamId } from "./botUtils";
+import { ConversationReferenceStore } from "./sdk/store";
+import { conversationIdToTeamId } from "./sdk/botUtils";
 
 const ErrorMessages = {
   OnlySupportTeam: "This bot app only supports running in a Team, not group chat or personal chat",

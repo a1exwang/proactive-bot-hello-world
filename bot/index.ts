@@ -1,9 +1,9 @@
 import * as restify from "restify";
-import { getTeamMemberInfoByEmail } from "./botUtils";
+import { getTeamMemberInfoByEmail } from "./sdk/botUtils";
 import { BotFrameworkAdapter, MessageFactory } from "botbuilder";
 import { TeamsBot } from "./teamsBot";
-import { ConversationReferenceFileStore } from "./store";
-import { NotificationSender } from "./notificationSender";
+import { ConversationReferenceFileStore } from "./sdk/store";
+import { NotificationSender } from "./sdk/notificationSender";
 
 const adapter = new BotFrameworkAdapter({
   appId: process.env.BOT_ID,

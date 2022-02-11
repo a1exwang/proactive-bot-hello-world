@@ -1,6 +1,7 @@
 import { BotFrameworkAdapter, ConversationReference, TeamsChannelAccount, TeamsInfo, TurnContext } from "botbuilder";
 
 export function conversationIdToTeamId(conversationId: string): string {
+  // TODO: convert non-Team conversation ID to team ID, used for resetting
   return conversationId;
 }
 
