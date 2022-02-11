@@ -1,0 +1,23 @@
+{
+    "appName": "notifyMembersSample",
+    "projectId": "0bec2384-8bd0-48b3-8c6e-205dba7083f4",
+    "solutionSettings": {
+        "name": "fx-solution-azure",
+        "version": "1.0.0",
+        "hostType": "Azure",
+        "azureResources": [],
+        "capabilities": [
+            "Bot"
+        ],
+        "activeResourcePlugins": [
+            "fx-resource-identity",
+            "fx-resource-bot",
+            "fx-resource-aad-app-for-teams",
+            "fx-resource-local-debug",
+            "fx-resource-appstudio"
+        ]
+    },
+    "version": "2.1.0",
+    "isFromSample": false,
+    "programmingLanguage": "typescript"
+}
