@@ -1,6 +1,6 @@
 {
-    "appName": "aochengbot01",
-    "projectId": "c84c6246-1230-4108-98ad-33840b36a809",
+    "appName": "notifyMembersSample",
+    "projectId": "0bec2384-8bd0-48b3-8c6e-205dba7083f4",
     "solutionSettings": {
         "name": "fx-solution-azure",
         "version": "1.0.0",
@@ -17,7 +17,7 @@
             "fx-resource-appstudio"
         ]
     },
-    "version": "2.0.0",
+    "version": "2.1.0",
     "isFromSample": false,
     "programmingLanguage": "typescript"
 }

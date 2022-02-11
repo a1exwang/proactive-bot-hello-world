@@ -7,20 +7,20 @@
     "developer": {
         "name": "Teams App, Inc.",
         "websiteUrl": "{{{localSettings.frontend.tabEndpoint}}}",
-        "privacyUrl": "{{{localSettings.frontend.tabEndpoint}}}/index.html#/privacy",
-        "termsOfUseUrl": "{{{localSettings.frontend.tabEndpoint}}}/index.html#/termsofuse"
+        "privacyUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/privacy",
+        "termsOfUseUrl": "{{{localSettings.frontend.tabEndpoint}}}{{{localSettings.frontend.tabIndexPath}}}/termsofuse"
     },
     "icons": {
         "color": "resources/color.png",
         "outline": "resources/outline.png"
     },
     "name": {
-        "short": "aochengbot01-local-debug",
-        "full": "aochengbot01-local-debug"
+        "short": "notifyMembersSample",
+        "full": "notifyMembersSample"
     },
     "description": {
-        "short": "Short description of aochengbot01-local-debug",
-        "full": "Full description of aochengbot01-local-debug"
+        "short": "Short description of notifyMembersSample",
+        "full": "Full description of notifyMembersSample"
     },
     "accentColor": "#FFFFFF",
     "bots": [

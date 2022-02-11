@@ -1,8 +1,11 @@
-import { BotFrameworkAdapter, ChannelInfo, ConversationReference, TeamInfo, TeamsActivityHandler, TeamsChannelData, TeamsInfo, TurnContext } from "botbuilder";
-import { ConversationReferenceStore } from "./store";
+import { TeamsActivityHandler, CardFactory, TurnContext, MessageFactory, BotFrameworkAdapter } from "botbuilder";
+import rawWelcomeCard from "./adaptiveCards/welcome.json"
+import { AdaptiveCards } from "@microsoft/adaptivecards-tools";
+import { ConversationReferenceStore } from "./sdk/store";
+import { conversationIdToTeamId } from "./sdk/botUtils";
 
-function cloneConversationReference(ref: Partial<ConversationReference>): Partial<ConversationReference> {
-  return JSON.parse(JSON.stringify(ref));
+const ErrorMessages = {
+  OnlySupportTeam: "This bot app only supports running in a Team, not group chat or personal chat",
 }
 
 // Catch-all for errors.
@@ -26,60 +29,81 @@ const onTurnErrorHandler = async (context: TurnContext, error: Error) => {
 };
 
 export class TeamsBot extends TeamsActivityHandler {
-  adapter: BotFrameworkAdapter;
-  conversationReferenceStore: ConversationReferenceStore;
+  store: ConversationReferenceStore;
   botId: string;
+  adapter: BotFrameworkAdapter;
 
-  constructor(adapter: BotFrameworkAdapter, conversationReferenceStore: ConversationReferenceStore, botId: string) {
+  constructor(adapter: BotFrameworkAdapter, store: ConversationReferenceStore, botId: string) {
     super();
+
+    // Set the onTurnError for the singleton BotFrameworkAdapter.
+    adapter.onTurnError = onTurnErrorHandler;
+
     this.adapter = adapter;
-    this.conversationReferenceStore = conversationReferenceStore;
+    this.store = store;
     this.botId = botId;
 
-    this.onMembersAdded(async (context: TurnContext, next) => {
-      let isSelfAdded: boolean = false;
-      // check whether the member added is myself (the bot app)
-      for (const member of context.activity.membersAdded) {
-        if (member.id.includes(botId)) {
-          isSelfAdded = true;
+    this.onMessage(async (context, next) => {
+      if (context.activity.conversation.conversationType !== "channel") {
+        await this.sendMessageActivity(context, ErrorMessages.OnlySupportTeam);
+        await next();
+        return;
+      }
+
+      let txt = context.activity.text;
+      const removedMentionText = TurnContext.removeRecipientMention(
+        context.activity
+      );
+      if (removedMentionText) {
+        // Remove the line break
+        txt = removedMentionText.toLowerCase().replace(/\n|\r/g, "").trim();
+      }
+
+      // Trigger command by IM text
+      switch (txt) {
+        case "welcome": {
+          const card = AdaptiveCards.declareWithoutData(rawWelcomeCard).render();
+          await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
+          break;
+        }
+        case "reset": {
+          // reset conversation reference to current team in case conversation reference lost
+          const ref = TurnContext.getConversationReference(context.activity);
+          ref.conversation.id = conversationIdToTeamId(ref.conversation.id);
+          await this.store.set(ref);
+          break;
         }
       }
 
+      await next();
+    });
+
+    this.onMembersAdded(async (context, next) => {
+      let isSelfAdded = false;
+      for (const member of context.activity.membersAdded) {
+        if (member.id.includes(this.botId)) {
+          isSelfAdded = true;
+        }
+      }
+      
       if (isSelfAdded) {
-        const ref = TurnContext.getConversationReference(context.activity);
-        this.conversationReferenceStore.add(ref);
+        if (context.activity.conversation.conversationType !== "channel") {
+          await this.sendMessageActivity(context, ErrorMessages.OnlySupportTeam);
+          await next();
+          return;
+        }
+        await this.store.set(TurnContext.getConversationReference(context.activity));
       }
+
+      // Show welcome message when a member (including bot) is added to the channel.
+      const card = AdaptiveCards.declareWithoutData(rawWelcomeCard).render();
+      await context.sendActivity({ attachments: [CardFactory.adaptiveCard(card)] });
 
       await next();
     });
+  }
 
-    this.onTeamsChannelCreatedEvent(async (channelInfo: ChannelInfo, teamInfo: TeamInfo, context: TurnContext, next) => {
-      if (channelInfo.id) {
-        const ref = TurnContext.getConversationReference(context.activity);
-        const channelRef = cloneConversationReference(ref);
-        channelRef.conversation.id = channelInfo.id;
-        channelRef.conversation.name = channelInfo.name;
-        this.conversationReferenceStore.add(channelRef);
-      }
-
-      await next();
-    });
-
-    this.onTeamsChannelDeletedEvent(async (channelInfo: ChannelInfo, teamInfo: TeamInfo, context: TurnContext, next) => {
-      if (channelInfo.id) {
-        const ref = TurnContext.getConversationReference(context.activity);
-        const channelRef = cloneConversationReference(ref);
-        channelRef.conversation.id = channelInfo.id;
-        channelRef.conversation.name = channelInfo.name;
-        this.conversationReferenceStore.delete(channelInfo.id);
-      }
-
-      await next();
-    })
-
-    // TODO: implement all conversation update events, for example, onTeamsMemberAdded
-
-    // Set the onTurnError for the singleton BotFrameworkAdapter.
-    this.adapter.onTurnError = onTurnErrorHandler;
+  async sendMessageActivity(context: TurnContext, message: string): Promise<void> {
+    await context.sendActivity(MessageFactory.text(message));
   }
 }

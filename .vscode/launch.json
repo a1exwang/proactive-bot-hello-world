@@ -8,7 +8,7 @@
             "url": "https://teams.microsoft.com/l/app/${teamsAppId}?installAppPackage=true&webjoin=true&${account-hint}",
             "presentation": {
                 "group": "remote",
-                "order": 1
+                "order": 2
             }
         },
         {
@@ -18,7 +18,7 @@
             "url": "https://teams.microsoft.com/l/app/${teamsAppId}?installAppPackage=true&webjoin=true&${account-hint}",
             "presentation": {
                 "group": "remote",
-                "order": 2
+                "order": 1
             }
         },
         {
@@ -70,7 +70,7 @@
             "preLaunchTask": "Pre Debug Check",
             "presentation": {
                 "group": "all",
-                "order": 1
+                "order": 2
             },
             "stopAll": true
         },
@@ -83,7 +83,7 @@
             "preLaunchTask": "Pre Debug Check",
             "presentation": {
                 "group": "all",
-                "order": 2
+                "order": 1
             },
             "stopAll": true
         }
