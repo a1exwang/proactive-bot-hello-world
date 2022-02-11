@@ -41,6 +41,7 @@ server.post("/api/messages", async (req, res) => {
 // HTTP trigger for the notification.
 server.post("/api/notification", async (req, res) => {
   const refs = await conversationReferenceStore.list();
+  // Developers can also getContext() and then call TeamsInfo APIs with the context to list member and channels.
   for (const ref of refs) {
     const receiverConversationId = await getTeamMemberInfoByEmail(adapter, ref, req.body.receiver);
     if (receiverConversationId) {

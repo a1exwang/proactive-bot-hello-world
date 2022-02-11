@@ -5,9 +5,15 @@ export function conversationIdToTeamId(conversationId: string): string {
   return conversationId;
 }
 
+export async function getContext(adapter: BotFrameworkAdapter, ref: Partial<ConversationReference>, callback: (TurnContext) => Promise<void>): Promise<void> {
+  await adapter.continueConversation(ref, async (context: TurnContext) => {
+    await callback(context);
+  });
+}
+
 export async function getTeamMemberInfoByEmail(adapter: BotFrameworkAdapter, ref: Partial<ConversationReference>, email: string): Promise<TeamsChannelAccount | undefined> {
   let members: TeamsChannelAccount[];
-  await adapter.continueConversation(ref, async (context: TurnContext) => {
+  await getContext(adapter, ref, async (context) => {
     members = await TeamsInfo.getMembers(context);
   });
 
