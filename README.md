@@ -9,7 +9,7 @@ The app can be installed to a single team. It can send notifications to single t
 1. Run the following command to trigger the notification:
 
 ```
-curl -X POST http://localhost:3978/api/notify -H 'Content-Type: application/json' -d '{"receiver":"test@example.com","content":"your plain text notification content"}'
+curl -X POST http://localhost:3978/api/notification -H 'Content-Type: application/json' -d '{"receiver":"test@example.com","content":"your plain text notification content"}'
 ```
 
 ## Other usage
