@@ -3,14 +3,16 @@ import * as restify from "restify";
 
 // Import required bot services.
 // See https://aka.ms/bot-services to learn more about the different parts of a bot.
-import { BotFrameworkAdapter } from "botbuilder";
+import { BotFrameworkAdapter, MessageFactory } from "botbuilder";
 
-import { ConversationReferenceStore } from "./store";
+import { ConversationReferenceFileStore } from "./sdk/conversationReferenceFileStore";
 import { TeamsBot } from "./teamsBot";
-import { NotificationSender } from "./notificationSender";
+import { NotificationSender } from "./sdk/notificationSender";
+import { getTeamMemberInfoByEmail } from "./sdk/botUtils";
 
 // Create HTTP server.
 const server = restify.createServer();
+server.use(restify.plugins.bodyParser({ mapParams: false }));
 server.listen(process.env.port || process.env.PORT || 3978, () => {
   console.log(`\nBot Started, ${server.name} listening to ${server.url}`);
 });
@@ -23,7 +25,7 @@ const adapter = new BotFrameworkAdapter({
 });
 
 // Create conversation reference storage
-const conversationReferenceStore = new ConversationReferenceStore();
+const conversationReferenceStore = new ConversationReferenceFileStore("ref.json");
 // Create the bot that will handle incoming messages.
 const bot = new TeamsBot(adapter, conversationReferenceStore, process.env.BOT_ID);
 // Create notification sender to proactively send outgoing messages.
@@ -38,9 +40,16 @@ server.post("/api/messages", async (req, res) => {
 
 // HTTP trigger for the notification.
 server.post("/api/notification", async (req, res) => {
-  for (const ref of conversationReferenceStore.get()) {
-    const notificationText = `Hello ${ref.conversation.name || "General"}!\nYou've received a notification triggered by API.`;
-    await notificationSender.sendNotification(ref, notificationText);
+  const refs = await conversationReferenceStore.list();
+  // Developers can also getContext() and then call TeamsInfo APIs with the context to list member and channels.
+  for (const ref of refs) {
+    const receiverConversationId = await getTeamMemberInfoByEmail(adapter, ref, req.body.receiver);
+    if (receiverConversationId) {
+      const message = MessageFactory.text(req.body.content);
+      await notificationSender.sendNotificationToMember(ref, receiverConversationId, message);
+    }
   }
+
   res.json({});
 });
+
