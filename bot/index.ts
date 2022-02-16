@@ -31,7 +31,7 @@ adapter.use(async (context: TurnContext, next) => {
 });
 
 // Create conversation reference storage
-const conversationReferenceStore = new ConversationReferenceFileStore("ref.json");
+const conversationReferenceStore = new ConversationReferenceFileStore("../ref.json");
 const settingsStore = new SettingsStore();
 // Create the bot that will handle incoming messages.
 const bot = new TeamsBot(adapter, conversationReferenceStore, settingsStore, process.env.BOT_ID);

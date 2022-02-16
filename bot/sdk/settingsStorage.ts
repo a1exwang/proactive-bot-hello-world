@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 
 export class SettingsStorage {
-	filePath: string = "settings.json";
+	filePath: string = "../settings.json";
 
 	async get(): Promise<any> {
 		try {
