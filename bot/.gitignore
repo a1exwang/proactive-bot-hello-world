@@ -1,10 +1,17 @@
-# dependencies
-node_modules/
+# TypeScript output
+dist
+out
+
+# Dependency directories
+node_modules
+
+# Azure Functions artifacts
+bin
+obj
+appsettings.json
+local.settings.json
 
 # misc
-.env
-.deployment
 .DS_Store
-
-# build
-lib/
+.deployment
+.env
