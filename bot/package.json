@@ -6,12 +6,13 @@
   "license": "MIT",
   "scripts": {
     "dev:teamsfx": "env-cmd --silent -f .env.teamsfx.local npm run dev",
-    "dev": "func start --typescript --language-worker=\"--inspect=9229\" --port \"7071\" --cors \"*\"",
+    "dev": "func start --typescript --language-worker=\"--inspect=9239\" --port \"3978\" --cors \"*\"",
     "watch:teamsfx": "tsc --watch",
     "build": "tsc",
     "watch": "tsc -w",
     "prestart": "npm run build",
-    "start": "npx func start"
+    "start": "npx func start",
+    "dev:teamsfx:prepare-storage": "azurite --silent --location ./_storage_emulator --debug ./_storage_emulator/debug.log"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@azure/functions": "^1.2.3",
+    "azurite": "^3.15.0",
     "env-cmd": "^10.1.0",
     "ts-node": "~9.1.1",
     "typescript": "~3.9.2"

@@ -15,3 +15,9 @@ local.settings.json
 .DS_Store
 .deployment
 .env
+
+# Azurite emulator
+_storage_emulator
+
+# Local data
+ref.json

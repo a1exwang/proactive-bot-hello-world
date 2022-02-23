@@ -43,7 +43,10 @@
                     "PATH": "${env:PATH}${command:fx-extension.get-func-path}"
                 }
             },
-            "dependsOn": "Watch Bot"
+            "dependsOn": [
+                "Watch Bot",
+                "Start Azurite Emulator"
+            ]
         },
         {
             "label": "Watch Bot",
@@ -51,6 +54,33 @@
             "command": "npm run watch:teamsfx",
             "isBackground": true,
             "problemMatcher": "$tsc-watch",
+            "options": {
+                "cwd": "${workspaceFolder}/bot"
+            },
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
+            "label": "Start Azurite Emulator",
+            "type": "shell",
+            "command": "npm run dev:teamsfx:prepare-storage",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": [
+                    {
+                        "regexp": "^.*$",
+                        "file": 0,
+                        "location": 1,
+                        "message": 2,
+                    }
+                ],
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "Azurite",
+                    "endsPattern": "successfully listening"
+                }
+            },
             "options": {
                 "cwd": "${workspaceFolder}/bot"
             },
